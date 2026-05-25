@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaze Auth - Premium Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #000000;
+            --bg-surface: #050505;
+            --bg-card: #0a0a0a;
+            --border-color: #141414;
+            --border-hover: #222222;
+            --text-main: #f5f5f7;
+            --text-muted: #666666;
+            --accent: #a855f7;
+            --accent-glow: rgba(168, 85, 247, 0.15);
+            --success: #10b981;
+            --danger: #ef4444;
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-sans);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(168, 85, 247, 0.015) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.015) 0, transparent 50%);
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 260px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 0;
+            position: fixed;
+            height: 100vh;
+            background: var(--bg-base);
+            z-index: 10;
+        }
+
+        .brand-container {
+            padding: 0 30px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--accent);
+        }
+
+        .brand {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--text-main);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .sidebar-section-title {
+            padding: 0 30px;
+            font-size: 9px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            padding: 12px 30px;
+            color: var(--text-muted);
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .nav-item.active {
+            color: var(--text-main);
+            background: rgba(168, 85, 247, 0.04);
+            font-weight: 500;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 2px;
+            height: 18px;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        /* Main Area */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 50px 60px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            margin-bottom: 45px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 25px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .page-desc {
+            color: var(--text-muted);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pulse {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Dashboard Tabs (Grid) */
+        .tab-panel {
+            display: none;
+            animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Vercel-style stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Premium Form controls */
+        .glass-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .glass-box-title {
+            font-size: 14px;
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            color: var(--text-main);
+            border-left: 2px solid var(--accent);
+            padding-left: 12px;
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 16px;
+            font-size: 13px;
+            outline: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: var(--font-mono);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.05);
+        }
+
+        select.form-control {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .btn-action {
+            background: var(--text-main);
+            color: var(--bg-base);
+            border: none;
+            padding: 14px 28px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-action-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-action-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Key Generator Result Box */
+        .generated-key-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(168, 85, 247, 0.03);
+            border: 1px dashed rgba(168, 85, 247, 0.2);
+            border-radius: 6px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .generated-key-container.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .key-value {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: #fff;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        /* Clean Table */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-size: 10px;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        td {
+            font-size: 13px;
+        }
+
+        .td-key {
+            font-family: var(--font-mono);
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+
+        .badge-plan {
+            font-size: 9px;
+            font-family: var(--font-mono);
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .badge-plan.plan-private {
+            background: rgba(168, 85, 247, 0.05);
+            border-color: rgba(168, 85, 247, 0.2);
+            color: var(--accent);
+        }
+
+        .badge-status-td {
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-status-td.active { color: var(--success); }
+        .badge-status-td.pending { color: #f59e0b; }
+
+        /* Infrastructure list */
+        .infra-list {
+            list-style: none;
+        }
+
+        .infra-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        .infra-item:last-child {
+            border-bottom: none;
+        }
+
+        .infra-label {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .infra-value {
+            font-family: var(--font-mono);
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand-container">
+            <div class="brand-logo"></div>
+            <div class="brand">Kaze Admin</div>
+        </div>
+
+        <div class="sidebar-section-title">Principal</div>
+        <div class="nav-item active" onclick="switchTab('tab-overview', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            Overview
+        </div>
+
+        <div class="sidebar-section-title">Área Staff</div>
+        <div class="nav-item" onclick="switchTab('tab-staff', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Controle de HWID
+        </div>
+
+        <div class="sidebar-section-title">Área CEO</div>
+        <div class="nav-item" onclick="switchTab('tab-ceo', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Gerador Master
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-team', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Gestão de Equipe
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- HEADER COMPARTILHADO -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title" id="tabTitle">Overview</h1>
+                <p class="page-desc" id="tabDesc">Estatísticas e integridade do ecossistema de autenticação.</p>
+            </div>
+            <div class="badge-status">
+                <div class="badge-pulse"></div>
+                MongoDB Connected
+            </div>
+        </div>
+
+        <!-- 1. TAB OVERVIEW -->
+        <div id="tab-overview" class="tab-panel active">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Licenças Ativas</div>
+                    <div class="stat-value" id="statActiveKeys">412</div>
+                    <div class="stat-sub"><span style="color: var(--success)">+12%</span> desde ontem</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Usuários Online</div>
+                    <div class="stat-value">84</div>
+                    <div class="stat-sub">Sessões em tempo real</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Requisições (24h)</div>
+                    <div class="stat-value">18.4K</div>
+                    <div class="stat-sub">Vercel Edge Network</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">MongoDB Standby</div>
+                    <div class="stat-value" style="color: var(--success)">0ms</div>
+                    <div class="stat-sub">Latência estável</div>
+                </div>
+            </div>
+
+            <!-- Infra details and Activity -->
+            <div class="grid-2col">
+                <div class="glass-box">
+                    <div class="glass-box-title">Infraestrutura (Vercel & MongoDB)</div>
+                    <ul class="infra-list">
+                        <li class="infra-item">
+                            <span class="infra-label">Deployment Host</span>
+                            <span class="infra-value">vercel.app</span>
+                        </li>
+                        <li class="infra-item">
+                            <span class="infra-label">Região Servidor</span>
+                            <span class="infra-value" style="color: var(--accent)">AWS gru1 (São Paulo)</span>
+                        </li>
+                        <li class="infra-item">
+                            <span class="infra-label">Database Engine</span>
+                            <span class="infra-value">MongoDB Atlas cluster0</span>
+                        </li>
+                        <li class="infra-item">
+                            <span class="infra-label">API SSL Status</span>
+                            <span class="infra-value" style="color: var(--success)">AES-256-GCM Secure</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="glass-box">
+                    <div class="glass-box-title">Logs Recentes do Sistema</div>
+                    <div style="font-family: var(--font-mono); font-size: 11px; line-height: 1.8; color: #777;">
+                        <div>[<span style="color: var(--success)">OK</span>] MongoDB Connected to kaze-auth-db (0.8ms)</div>
+                        <div>[<span style="color: var(--accent)">INFO</span>] License KAZE-PRIVATE-C3D4 authenticated from HWID...</div>
+                        <div>[<span style="color: var(--accent)">INFO</span>] Vercel edge serverless function woke up (gru1)</div>
+                        <div>[<span style="color: var(--danger)">WARN</span>] Session registration blocked: Invalid Signature key</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. TAB STAFF (Controle de HWID / Licenças) -->
+        <div id="tab-staff" class="tab-panel">
+            <div class="glass-box">
+                <div class="glass-box-title">Buscar & Resetar HWID</div>
+                <div style="display: flex; gap: 15px;">
+                    <input type="text" class="form-control" style="flex: 1" id="searchKeyInput" placeholder="Insira a Licença ou Usuário para consultar...">
+                    <button class="btn-action" style="padding: 0 30px" onclick="simulateHWIDReset()">Resetar HWID</button>
+                </div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 10px; font-family: var(--font-mono)">
+                    // O reset de HWID destrava a máquina do usuário para nova ativação no banco MongoDB.
+                </p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Licença</th>
+                            <th>Plano</th>
+                            <th>Último HWID</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keysTableBodyStaff">
+                        <tr>
+                            <td class="td-key">KAZE-PRIVATE-7Z6W-9Y2Q</td>
+                            <td><span class="badge-plan plan-private">Private</span></td>
+                            <td style="font-family: var(--font-mono); color: #888;">F89D-C3A1-7E02-BD90</td>
+                            <td><span class="badge-status-td active">● Ativa</span></td>
+                        </tr>
+                        <tr>
+                            <td class="td-key">KAZE-BASIC-4G8P-2M9S</td>
+                            <td><span class="badge-plan">Basic</span></td>
+                            <td style="font-family: var(--font-mono); color: #888;">92B1-40FF-BC92-00AA</td>
+                            <td><span class="badge-status-td active">● Ativa</span></td>
+                        </tr>
+                        <tr>
+                            <td class="td-key">KAZE-REMOTE-0X9A-4R1P</td>
+                            <td><span class="badge-plan">Remote</span></td>
+                            <td style="font-family: var(--font-mono); color: #888;">Aguardando ativação</td>
+                            <td><span class="badge-status-td pending">● Pendente</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. TAB CEO (Gerador Master) -->
+        <div id="tab-ceo" class="tab-panel">
+            <div class="grid-2col">
+                <div>
+                    <div class="glass-box">
+                        <div class="glass-box-title">Configurar Nova Licença</div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Plano</label>
+                            <select class="form-control" id="planSelect">
+                                <option value="Basic">Basic</option>
+                                <option value="Remote">Remote</option>
+                                <option value="External">External</option>
+                                <option value="Private">Private</option>
+                                <option value="Internal">Internal</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Duração</label>
+                            <select class="form-control" id="durationSelect">
+                                <option value="1 Dia">1 Dia</option>
+                                <option value="7 Dias">7 Dias</option>
+                                <option value="30 Dias">30 Dias</option>
+                                <option value="Lifetime">Lifetime</option>
+                            </select>
+                        </div>
+
+                        <button class="btn-action" style="width: 100%" onclick="generateKeyMaster()">Gerar Licença Master</button>
+
+                        <div class="generated-key-container" id="resultContainer">
+                            <div>
+                                <div style="font-size: 10px; font-family: var(--font-mono); color: var(--accent); margin-bottom: 4px;">CHAVE GERADA</div>
+                                <div class="key-value" id="keyValue">KAZE-XXXX-XXXX-XXXX</div>
+                            </div>
+                            <button class="btn-action btn-action-outline" style="padding: 6px 12px; font-size: 10px;" onclick="copyKey()">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="glass-box">
+                        <div class="glass-box-title">Licenças Criadas Recentemente (MongoDB Log)</div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Licença</th>
+                                        <th>Plano</th>
+                                        <th>Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keysTableBodyCeo">
+                                    <!-- Dinâmico via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. TAB TEAM (Gestão de Equipe) -->
+        <div id="tab-team" class="tab-panel">
+            <div class="glass-box">
+                <div class="glass-box-title">Adicionar Membro da Staff</div>
+                <div class="grid-2col">
+                    <div class="form-group">
+                        <label class="form-label">Username do Staff</label>
+                        <input type="text" class="form-control" id="staffUser" placeholder="Ex: fkdhtk">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nível de Permissão</label>
+                        <select class="form-control" id="staffRole">
+                            <option value="Staff">Staff (Apenas consulta e reset HWID)</option>
+                            <option value="CEO">CEO (Acesso total)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-action" onclick="addStaffMember()">Adicionar à Equipe</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Membro</th>
+                            <th>Nível</th>
+                            <th>Última Ação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamTableBody">
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-weight: 500;">fkdhtk</td>
+                            <td><span class="badge-plan plan-private" style="color: var(--accent);">CEO</span></td>
+                            <td style="font-size: 12px; color: #888;">Gerou licença Master (Private)</td>
+                            <td><span style="color: var(--text-muted); font-size: 11px;">Admin Global</span></td>
+                        </tr>
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-weight: 500;">gabs_staff</td>
+                            <td><span class="badge-plan" style="color: #94a3b8;">STAFF</span></td>
+                            <td style="font-size: 12px; color: #888;">Resetou HWID de KAZE-BASIC-...</td>
+                            <td><button class="btn-action btn-action-outline" style="padding: 4px 10px; font-size: 10px;" onclick="removeStaff(this)">Revogar</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Verificação de Autenticação e Permissão
+        const token = localStorage.getItem('kaze_token');
+        const userStr = localStorage.getItem('kaze_user');
+        
+        if (!token || !userStr) {
+            alert("Acesso negado. Por favor, faça login.");
+            window.location.href = '/';
+        }
+
+        const currentUser = JSON.parse(userStr);
+
+        // Se for um usuário comum, ele não deve ter acesso ao painel de admin
+        if (currentUser.role !== 'CEO' && currentUser.role !== 'Staff') {
+            alert("Acesso restrito apenas para a Staff.");
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        // Restringir itens visíveis na sidebar dependendo da role
+        document.addEventListener('DOMContentLoaded', () => {
+            if (currentUser.role !== 'CEO') {
+                // Esconder títulos e botões exclusivos do CEO
+                document.querySelectorAll('.sidebar-section-title').forEach(el => {
+                    if (el.textContent.includes('Área CEO')) {
+                        el.style.display = 'none';
+                    }
+                });
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    if (el.textContent.includes('Gerador Master') || el.textContent.includes('Gestão de Equipe')) {
+                        el.style.display = 'none';
+                    }
+                });
+            }
+            // Inicializar dados do banco
+            fetchLicenses();
+            if (currentUser.role === 'CEO') {
+                fetchTeam();
+            }
+        });
+
+        // Memória virtual local
+        let recentKeys = [];
+        let teamMembers = [];
+
+        // Mapeamento de descrições de abas
+        const tabMeta = {
+            'tab-overview': { title: 'Overview', desc: 'Estatísticas em tempo real e integridade do ecossistema.' },
+            'tab-staff': { title: 'Controle de HWID (Staff)', desc: 'Gerenciamento de travas de hardware e licenças de clientes.' },
+            'tab-ceo': { title: 'Gerador Master (CEO)', desc: 'Área exclusiva para criação de novas licenças e chaves criptográficas.' },
+            'tab-team': { title: 'Gestão de Equipe (CEO)', desc: 'Gerenciamento de permissões e controle de membros da Staff.' }
+        };
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            el.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            document.getElementById('tabTitle').innerText = tabMeta[tabId].title;
+            document.getElementById('tabDesc').innerText = tabMeta[tabId].desc;
+        }
+
+        // FETCH REAL DAS LICENÇAS DO MONGODB via Vercel Serverless
+        async function fetchLicenses() {
+            try {
+                const response = await fetch('/api/keys', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    recentKeys = data.licenses || [];
+                    renderCEOAndStaffTables();
+                } else {
+                    console.error(data.message);
+                }
+            } catch (e) {
+                console.error("Erro ao buscar chaves do MongoDB:", e);
+            }
+        }
+
+        function renderCEOAndStaffTables() {
+            // Renderiza tabela Staff
+            const tbodyStaff = document.getElementById('keysTableBodyStaff');
+            tbodyStaff.innerHTML = '';
+            
+            recentKeys.forEach(item => {
+                const isActive = item.status === 'Ativa';
+                const statusClass = isActive ? 'active' : 'pending';
+                const statusText = isActive ? '● Ativa' : '● Pendente';
+                const planClass = item.plan.toLowerCase() === 'private' ? 'plan-private' : '';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="td-key">${item.key}</td>
+                    <td><span class="badge-plan ${planClass}">${item.plan}</span></td>
+                    <td style="font-family: var(--font-mono); color: #888;">${item.hwid || 'NOT_SET'}</td>
+                    <td><span class="badge-status-td ${statusClass}">${statusText}</span></td>
+                `;
+                tbodyStaff.appendChild(tr);
+            });
+
+            // Renderiza tabela CEO
+            const tbodyCeo = document.getElementById('keysTableBodyCeo');
+            tbodyCeo.innerHTML = '';
+
+            recentKeys.forEach(item => {
+                const planClass = item.plan.toLowerCase() === 'private' ? 'plan-private' : '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="td-key">${item.key}</td>
+                    <td><span class="badge-plan ${planClass}">${item.plan}</span></td>
+                    <td><button class="btn-action btn-action-outline" style="padding: 4px 10px; font-size: 10px;" onclick="revokeKey('${item.key}')">Revogar</button></td>
+                `;
+                tbodyCeo.appendChild(tr);
+            });
+
+            // Atualiza métricas estatísticas reais baseadas no banco de dados MongoDB
+            const activeCount = recentKeys.filter(k => k.status === 'Ativa').length;
+            document.getElementById('statActiveKeys').innerText = activeCount;
+        }
+
+        // GERAR LICENÇA MASTER NO MONGODB (CEO apenas)
+        async function generateKeyMaster() {
+            const plan = document.getElementById('planSelect').value;
+            const duration = document.getElementById('durationSelect').value;
+            
+            try {
+                const response = await fetch('/api/keys', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: 'generate', plan, duration })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const resultContainer = document.getElementById('resultContainer');
+                    document.getElementById('keyValue').innerText = data.key;
+                    resultContainer.classList.add('active');
+                    
+                    fetchLicenses(); // Atualiza a lista de chaves
+                } else {
+                    alert(data.message);
+                }
+            } catch (e) {
+                console.error("Erro ao gerar chave:", e);
+                alert("Erro ao criar chave no MongoDB.");
+            }
+        }
+
+        // REVOGAR LICENÇA NO MONGODB (CEO apenas)
+        async function revokeKey(key) {
+            if (!confirm(`Deseja realmente revogar a licença ${key}? Isso também deletará o usuário associado.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/keys', {
+                    method: 'DELETE',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ key })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+                
+                if (response.ok) {
+                    fetchLicenses();
+                }
+            } catch (e) {
+                console.error("Erro ao revogar chave:", e);
+                alert("Erro de conexão ao revogar licença.");
+            }
+        }
+
+        function copyKey() {
+            const keyText = document.getElementById('keyValue').innerText;
+            navigator.clipboard.writeText(keyText);
+            alert("Licença copiada com sucesso!");
+        }
+
+        // RESETAR HWID NO MONGODB (Staff ou CEO)
+        async function simulateHWIDReset() {
+            const key = document.getElementById('searchKeyInput').value.trim();
+            if(!key) {
+                alert("Por favor, digite uma licença.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/keys', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: 'reset_hwid', key })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+                if (response.ok) {
+                    document.getElementById('searchKeyInput').value = '';
+                    fetchLicenses();
+                }
+            } catch (e) {
+                console.error("Erro ao resetar HWID:", e);
+                alert("Erro ao conectar com a API de reset.");
+            }
+        }
+
+        // BUSCAR MEMBROS DA STAFF DO MONGODB (CEO)
+        async function fetchTeam() {
+            try {
+                const response = await fetch('/api/team', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    teamMembers = data.team || [];
+                    renderTeamTable();
+                }
+            } catch (e) {
+                console.error("Erro ao carregar equipe:", e);
+            }
+        }
+
+        function renderTeamTable() {
+            const tbody = document.getElementById('teamTableBody');
+            tbody.innerHTML = '';
+
+            teamMembers.forEach(member => {
+                const isCeo = member.role === 'CEO';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-family: var(--font-mono); font-weight: 500;">${member.username}</td>
+                    <td><span class="badge-plan ${isCeo ? 'plan-private' : ''}" style="${isCeo ? 'color: var(--accent);' : 'color: #94a3b8;'}">${member.role}</span></td>
+                    <td style="font-size: 12px; color: #888;">Cadastrado em: ${new Date(member.createdAt).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                        ${member.username.toLowerCase() === currentUser.username.toLowerCase() 
+                            ? '<span style="color: var(--text-muted); font-size: 11px;">Você</span>' 
+                            : `<button class="btn-action btn-action-outline" style="padding: 4px 10px; font-size: 10px;" onclick="removeStaff('${member.username}')">Revogar</button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ADICIONAR STAFF NO MONGODB (CEO)
+        async function addStaffMember() {
+            const username = document.getElementById('staffUser').value.trim();
+            const role = document.getElementById('staffRole').value;
+            // Para criação de staff, solicitar via prompt simples
+            const password = prompt(`Defina uma senha temporária para o novo membro ${username}:`);
+            
+            if(!username || !password) {
+                alert("Por favor, preencha o username e senha temporária.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/team', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ username, password, role })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+                if (response.ok) {
+                    document.getElementById('staffUser').value = '';
+                    fetchTeam();
+                }
+            } catch (e) {
+                console.error("Erro ao adicionar membro:", e);
+                alert("Erro ao salvar equipe no MongoDB.");
+            }
+        }
+
+        // REMOVER STAFF NO MONGODB (CEO)
+        async function removeStaff(username) {
+            if(!confirm(`Deseja realmente revogar totalmente o acesso de ${username}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/team', {
+                    method: 'DELETE',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ username })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+                if (response.ok) {
+                    fetchTeam();
+                }
+            } catch (e) {
+                console.error("Erro ao remover staff:", e);
+                alert("Erro de conexão ao remover membro.");
+            }
+        }
+    </script>
+</body>
+</html>
